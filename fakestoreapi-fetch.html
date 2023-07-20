@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- Add Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      #products {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .childProducts {
+        width: 200px;
+        height: 300px;
+        background-color: aqua;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="container mt-5">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <form class="d-flex">
+              <input
+                id="searchInput"
+                class="form-control me-2"
+                type="search"
+                placeholder="Search"
+                aria-label="Search"
+              />
+              <button
+                id="searchButton"
+                class="btn btn-outline-primary"
+                type="button"
+              >
+                Search
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div id="products"></div>
+    </div>
+  </body>
+</html>
+<!-- Add Bootstrap JS (jQuery is required) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const parentProduct = document.getElementById("products");
+  const result = fetch("https://fakestoreapi.com/products");
+  result
+    .then((promiseData) => promiseData.json())
+    .then((parsedPromiseData) => {
+      //   console.log(parsedPromiseData);
+      renderUI(parsedPromiseData);
+    });
+
+  let realData = "";
+
+  function renderUI(data) {
+    // console.log(data);
+    realData = data;
+    for (let i = 0; i < data.length; i++) {
+      const childProduct = document.createElement("div");
+      childProduct.className = "childProducts";
+      const imgElement = document.createElement("img");
+      imgElement.src = data[i].image;
+      imgElement.style.width = "150px";
+      imgElement.style.height = "150px";
+      const titleElement = document.createElement("span");
+      titleElement.innerText = data[i].title;
+      const priceElement = document.createElement("span");
+      priceElement.innerText = data[i].price;
+      priceElement.style.fontSize = "18px";
+      childProduct.appendChild(imgElement);
+      childProduct.appendChild(titleElement);
+      childProduct.appendChild(priceElement);
+      parentProduct.appendChild(childProduct);
+    }
+  }
+  function searchItems(query) {
+    query = query.trim().toLowerCase(); // Convert query to lowercase and remove leading/trailing spaces
+    return realData.filter((realData) =>
+      realData.title.toLowerCase().includes(query)
+    );
+  }
+
+  // Function to handle search button click
+  function handleSearch() {
+    const searchInput = document.getElementById("searchInput");
+    const query = searchInput.value;
+
+    const searchResults = searchItems(query);
+    console.log("Search Results:", searchResults);
+    // display the search results on the page
+    displaySearchResults(searchResults);
+  }
+
+  // Function to display the search results
+  function displaySearchResults(results) {
+    parentProduct.innerHTML = ""; // Clear the previous results
+
+    if (results.length === 0) {
+      // Display a message when no results are found
+      const noResultsItem = document.createElement("li");
+      noResultsItem.classList.add("list-group-item");
+      noResultsItem.textContent = "No results found";
+      searchResultsList.appendChild(noResultsItem);
+    } else {
+      // Display each matching item in the results
+      for (let i = 0; i < results.length; i++) {
+        const childProduct = document.createElement("div");
+        childProduct.className = "childProducts";
+        const imgElement = document.createElement("img");
+        imgElement.src = realData[results[i].id - 1].image;
+        imgElement.style.width = "150px";
+        imgElement.style.height = "150px";
+        const titleElement = document.createElement("span");
+        titleElement.innerText = realData[results[i].id - 1].title;
+        const priceElement = document.createElement("span");
+        priceElement.innerText = realData[results[i].id - 1].price;
+        priceElement.style.fontSize = "18px";
+        childProduct.appendChild(imgElement);
+        childProduct.appendChild(titleElement);
+        childProduct.appendChild(priceElement);
+        parentProduct.appendChild(childProduct);
+      }
+    }
+  }
+
+  // Attach click event listener to the search button
+  const searchButton = document.getElementById("searchButton");
+  searchButton.addEventListener("click", handleSearch);
+</script>
